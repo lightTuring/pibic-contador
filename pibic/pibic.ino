@@ -9,7 +9,7 @@ int a = D5;
 int b = D7;
 int stateA = 0;
 int stateB = 1;
-int limit = 220;
+int limit = 130;
 int la = 0, lb = 0;
 int r = A0;
 //char id[] = "Galaxy A11b53c";
@@ -74,7 +74,6 @@ void loop() {
       //setCount(count);
     }      
   }
-  delay(20);
 }
 
 void change(){
