@@ -1,22 +1,22 @@
 #include <ESP8266WiFi.h>
 #include <LiquidCrystal_I2C.h>
-#include <ThingSpeak.h>
+#include <Ultrasonic.h>
 WiFiClient client;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 int count = 0;
-int a = D5;
-int b = D7;
-int stateA = 0;
-int stateB = 1;
-int limit = 125;
+int a = D5; //echo de B
+int b = D6; //trig de B
+int c = D10; //trig de A
+int d = D11; //echo de A
+int limit = 30;
 int la = 0, lb = 0;
-int r = A0;
 //char id[] = "Galaxy A11b53c";
 //char pass[] = "mtng6618";
 char str[20]; 
+Ultrasonic u1(d, c);//A
+Ultrasonic u2(b, a);//B
 
-void change();
 void updated();
 void setCount(int);
 void show(int);
@@ -28,7 +28,7 @@ void setup()
   sprintf(str, "%d", count);
   lcd.setCursor(0,0);
   lcd.print("Conectando:");
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println();
   
   /*WiFi.begin(id, pass);
@@ -43,10 +43,8 @@ void setup()
 
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());*/
-
-  pinMode(b, OUTPUT);
-  pinMode(a, OUTPUT);
-  pinMode(r, INPUT);
+  pinMode(D0, OUTPUT);
+  pinMode(D1, OUTPUT);
   //setCount(0);
   Serial.println(count);
   show(count);
@@ -55,7 +53,7 @@ void setup()
 void loop() {  
   updated();
   while (la < limit) {
-    delay(20);
+    delay(1);
     updated();
     if(la > limit && lb < limit) {
       count++;
@@ -65,42 +63,28 @@ void loop() {
     }
   }
   while (lb < limit) {
-    delay(20);
+    delay(1);
     updated();
     if(lb > limit && la < limit) {
       count--;
       Serial.println(count);
       show(count);
       //setCount(count);
-    }      
+    }
   }
-  delay(10);
-}
-
-void change(){
-  if(stateB && !stateA) {
-    stateB = !stateB;
-    stateA = !stateA;
-    digitalWrite(b, LOW);
-    digitalWrite(a, HIGH);
-  }
-  else if(stateA && !stateB) {
-    stateB = !stateB;
-    stateA = !stateA;
-    digitalWrite(a, LOW);
-    digitalWrite(b, HIGH);
-  }
+  delay(1);
 }
 
 void updated() {
-  change();
-  //stateB = 0; stateA = 1; a medição é de A
-  int x = analogRead(r);
-  la = x;   
-  change();
-  //stateB = 1; stateA = 0; a medição é de B
-  x = analogRead(r);
-  lb = x;  
+  la = u1.read(); 
+  delayMicroseconds(100);
+  lb = u2.read();
+  Serial.printf("la = %d\n lb = %d\n", la, lb);
+  delayMicroseconds(100);
+  if (la < limit) {digitalWrite(D0, HIGH);}
+  else {digitalWrite(D0, LOW);}
+  if(lb < limit) {digitalWrite(D1, HIGH);}
+  else {digitalWrite(D1, LOW);}
 }
 
 void show(int i) {
