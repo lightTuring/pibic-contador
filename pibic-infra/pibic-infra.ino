@@ -1,4 +1,6 @@
-int s[] = {D2, D3, D4, D5}; 
+#include <LiquidCrystal_I2C.h>
+
+int s[] = {D1, D2, D6, D7}; 
 int reader = A0;
 int limit = 100;
 int la = 0, lb = 0;
@@ -7,13 +9,20 @@ int count = 0;
 //char pass[] = "mtng6618";
 char str[20]; 
 
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+
 void updated();
 void setCount(int);
 void pins(int);
+void show(int);
 int outp(int);
 
 void setup()
-{/*
+{
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  /*
   lcd.begin();
   //ThingSpeak.begin(client);
   sprintf(str, "%d", count);
@@ -23,8 +32,6 @@ void setup()
     pinMode(s[i], OUTPUT);
   }
   pinMode(reader, INPUT);
-  Serial.begin(9600);
-  Serial.println("hello");
   
   /*WiFi.begin(id, pass);
 
@@ -48,8 +55,7 @@ void loop() {
     updated();
     if(la > limit && lb < limit) {
       count++;
-      Serial.println(count);
-      //show(count);
+      show(count);
       //setCount(count);
     }
   }
@@ -58,8 +64,7 @@ void loop() {
     updated();
     if(lb > limit && la < limit) {
       count--;
-      Serial.println(count);
-      //show(count);
+      show(count);
       //setCount(count);
     }
   }
@@ -70,14 +75,14 @@ void updated() {
   la = outp(0);
   lb = outp(1);
 }
-/*
+
 void show(int i) {
    lcd.clear();
    sprintf(str, "%d", count);
    lcd.setCursor(0,0);
    lcd.print("Pessoas: ");
-   lcd.print(str);
-}*/
+   lcd.print(str);   
+}
 //x in [0, 15]
 void pins (int x) {
   x = (x > 15 || x<0) ? 0 : x;
